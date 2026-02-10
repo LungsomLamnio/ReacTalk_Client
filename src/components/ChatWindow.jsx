@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Form, Button, InputGroup } from "react-bootstrap";
-import { Send, PersonCircle } from "react-bootstrap-icons";
+import { Send, PersonCircle, ArrowLeft } from "react-bootstrap-icons";
 
-export default function ChatWindow({ activeChat }) {
+export default function ChatWindow({ activeChat, onBack }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([
     {
@@ -40,6 +40,7 @@ export default function ChatWindow({ activeChat }) {
     setMessage("");
   };
 
+  // If no chat is selected (mostly relevant for the initial mobile view)
   if (!activeChat) {
     return (
       <div className="h-100 d-flex align-items-center justify-content-center bg-light">
@@ -49,13 +50,32 @@ export default function ChatWindow({ activeChat }) {
   }
 
   return (
-    <div className="d-flex flex-column h-100">
+    <div className="d-flex flex-column h-100 bg-white">
       {/* Chat Header - Height fixed to 72px to match Sidebar */}
       <div
         className="px-3 border-bottom bg-white d-flex align-items-center sticky-top"
         style={{ height: "72px" }}
       >
-        <PersonCircle size={35} className="text-secondary me-3" />
+        {/* Back Button: Visible only on mobile/tablet (below md breakpoint) */}
+        <Button
+          variant="light"
+          className="d-md-none rounded-circle p-2 me-2 border-0 shadow-none"
+          onClick={onBack}
+        >
+          <ArrowLeft size={22} className="text-dark" />
+        </Button>
+
+        {activeChat.profilePic ? (
+          <img
+            src={`http://localhost:3001${activeChat.profilePic}`}
+            className="rounded-circle me-3"
+            style={{ width: "35px", height: "35px", objectFit: "cover" }}
+            alt=""
+          />
+        ) : (
+          <PersonCircle size={35} className="text-secondary me-3" />
+        )}
+
         <div>
           <h6 className="mb-0 fw-bold">{activeChat.name}</h6>
           <small className="text-success small" style={{ fontSize: "0.8rem" }}>
@@ -75,8 +95,12 @@ export default function ChatWindow({ activeChat }) {
             className={`d-flex ${msg.isMe ? "justify-content-end" : "justify-content-start"}`}
           >
             <div
-              className={`p-3 rounded-4 shadow-sm ${msg.isMe ? "bg-dark text-white rounded-bottom-right-0" : "bg-white text-dark rounded-bottom-left-0"}`}
-              style={{ maxWidth: "70%" }}
+              className={`p-3 rounded-4 shadow-sm ${
+                msg.isMe
+                  ? "bg-dark text-white rounded-bottom-right-0"
+                  : "bg-white text-dark rounded-bottom-left-0"
+              }`}
+              style={{ maxWidth: "75%" }}
             >
               <div className="small mb-1 opacity-75">{msg.sender}</div>
               <div>{msg.text}</div>
@@ -91,7 +115,7 @@ export default function ChatWindow({ activeChat }) {
         ))}
       </div>
 
-      {/* Message Input (Aligned with the bottom) */}
+      {/* Message Input */}
       <div className="p-3 bg-white border-top">
         <Form onSubmit={handleSendMessage}>
           <InputGroup className="bg-light rounded-pill overflow-hidden border-0 px-2">
@@ -101,7 +125,11 @@ export default function ChatWindow({ activeChat }) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
             />
-            <Button type="submit" variant="link" className="text-dark pe-3">
+            <Button
+              type="submit"
+              variant="link"
+              className="text-dark pe-3 shadow-none"
+            >
               <Send size={24} />
             </Button>
           </InputGroup>

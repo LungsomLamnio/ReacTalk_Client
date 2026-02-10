@@ -21,7 +21,7 @@ export default function SignUp() {
     try {
       // Updated to Port 5001 to bypass macOS AirPlay conflict
       const response = await axios.post(
-        "http://localhost:3001/api/user/signup",
+        "http://localhost:3001/api/auth/signup",
         {
           username: formDetails.username,
           password: formDetails.password,

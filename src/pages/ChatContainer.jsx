@@ -25,7 +25,13 @@ export default function ChatContainer() {
     },
   ]);
 
-  const [activeChat, setActiveChat] = useState(contacts[0]);
+  const [activeChat, setActiveChat] = useState(null); // Default to null for mobile view
+  const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+
+  const handleSelectChat = (chat) => {
+    setActiveChat(chat);
+    setIsMobileChatOpen(true); // Switch to ChatWindow on mobile
+  };
 
   return (
     <Container
@@ -34,15 +40,31 @@ export default function ChatContainer() {
       style={{ backgroundColor: "#fafaf9" }}
     >
       <Row className="h-100 g-0">
-        <Col md={4} lg={3} className="border-end">
+        {/* Sidebar: Hidden on mobile if a chat is open */}
+        <Col
+          xs={12}
+          md={4}
+          lg={3}
+          className={`border-end h-100 ${isMobileChatOpen ? "d-none d-md-block" : "d-block"}`}
+        >
           <ChatSidebar
             contacts={contacts}
             activeChat={activeChat}
-            setActiveChat={setActiveChat}
+            setActiveChat={handleSelectChat}
           />
         </Col>
-        <Col md={8} lg={9}>
-          <ChatWindow activeChat={activeChat} />
+
+        {/* Chat Window: Hidden on mobile if no chat is open */}
+        <Col
+          xs={12}
+          md={8}
+          lg={9}
+          className={`h-100 ${isMobileChatOpen ? "d-block" : "d-none d-md-block"}`}
+        >
+          <ChatWindow
+            activeChat={activeChat}
+            onBack={() => setIsMobileChatOpen(false)} // Pass back function
+          />
         </Col>
       </Row>
     </Container>

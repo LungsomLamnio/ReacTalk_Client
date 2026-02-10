@@ -1,7 +1,7 @@
 import React from "react";
 import { CameraFill } from "react-bootstrap-icons";
 
-const ProfileAvatar = ({ preview, username, onFileChange }) => {
+const ProfileAvatar = ({ preview, username, onFileChange, readOnly }) => {
   return (
     <div className="position-relative d-inline-block mb-4">
       <div
@@ -20,25 +20,26 @@ const ProfileAvatar = ({ preview, username, onFileChange }) => {
           </span>
         )}
       </div>
-      <label
-        htmlFor="fileInput"
-        className="position-absolute bottom-0 end-0 btn btn-primary rounded-circle d-flex align-items-center justify-content-center border border-white shadow-sm"
-        style={{
-          width: "38px",
-          height: "38px",
-          padding: "0",
-          cursor: "pointer",
-        }}
-      >
-        <CameraFill size={18} />
-      </label>
-      <input
-        type="file"
-        id="fileInput"
-        hidden
-        onChange={onFileChange}
-        accept="image/*"
-      />
+
+      {/* Only show camera icon if NOT read-only */}
+      {!readOnly && (
+        <>
+          <label
+            htmlFor="fileInput"
+            className="position-absolute bottom-0 end-0 btn btn-primary rounded-circle d-flex align-items-center justify-content-center border border-white"
+            style={{ width: "40px", height: "40px", padding: "0" }}
+          >
+            <CameraFill size={18} />
+          </label>
+          <input
+            type="file"
+            id="fileInput"
+            hidden
+            onChange={onFileChange}
+            accept="image/*"
+          />
+        </>
+      )}
     </div>
   );
 };

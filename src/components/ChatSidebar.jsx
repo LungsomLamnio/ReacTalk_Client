@@ -163,13 +163,19 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat }) {
             <ListGroup.Item
               key={user._id || user.id}
               onClick={() => {
-                setActiveChat({
-                  id: user._id || user.id,
-                  name: user.username || user.name,
-                  profilePic: user.profilePic,
-                  status: "Online",
-                });
-                if (searchTerm) setSearchTerm(""); // Clear search after selecting
+                if (searchTerm) {
+                  // If we are searching, navigate to that person's public profile
+                  navigate(`/user/${user._id}`);
+                  setSearchTerm(""); // Clear search after navigating
+                } else {
+                  // If we are in the chat list, just open the chat
+                  setActiveChat({
+                    id: user._id || user.id,
+                    name: user.username || user.name,
+                    profilePic: user.profilePic,
+                    status: "Online",
+                  });
+                }
               }}
               className={`p-3 border-0 border-bottom cursor-pointer ${
                 activeChat?.id === (user._id || user.id) ? "bg-light" : ""

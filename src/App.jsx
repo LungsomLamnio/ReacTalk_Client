@@ -5,6 +5,7 @@ import Login from "./auth/Login";
 import { Container } from "react-bootstrap";
 import Chat from "./pages/ChatContainer";
 import UserProfile from "./pages/UserProfile";
+import ExternalUserProfile from "./pages/ExternalUserProfile";
 import "./App.css";
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/profile" element={<UserProfile />} />
+          <Route path="/user/:id" element={<ExternalUserProfile />} />
         </Routes>
       </Container>
     </div>

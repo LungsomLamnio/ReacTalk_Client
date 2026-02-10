@@ -22,7 +22,7 @@ export default function Login() {
     try {
       // Updated to Port 5001 to bypass macOS AirPlay conflict
       const response = await axios.post(
-        "http://localhost:3001/api/user/login",
+        "http://localhost:3001/api/auth/login",
         loginDetails,
       );
 
