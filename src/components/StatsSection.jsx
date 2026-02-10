@@ -1,15 +1,39 @@
 // components/StatsSection.jsx
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Apple, Android2 } from "react-bootstrap-icons";
-import { Counter } from "./Counter"; // Import the counter we made earlier
+import { Counter } from "./Counter";
 
 export const StatsSection = () => {
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // If the section is visible, set isInView to true
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect(); // Stop observing once animation starts
+        }
+      },
+      { threshold: 0.2 }, // Trigger when 20% of the section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-5 mt-5 bg-white border-top border-bottom position-relative">
+    <section
+      ref={sectionRef} // Attach the observer here
+      className="py-5 mt-5 bg-white border-top border-bottom position-relative"
+    >
       <Container>
         <Row className="g-5 align-items-center">
-          {/* Left: Text and Animated Stats */}
           <Col lg={6}>
             <h2 className="display-4 fw-bold mb-4">
               Real-time stats of <br /> our global community
@@ -22,7 +46,7 @@ export const StatsSection = () => {
             <Row className="text-start">
               <Col xs={4}>
                 <h3 className="fw-bold mb-0">
-                  <Counter end={100} suffix="k+" />
+                  <Counter end={100} suffix="k+" startAnimate={isInView} />
                 </h3>
                 <small
                   className="text-muted text-uppercase fw-bold"
@@ -33,7 +57,7 @@ export const StatsSection = () => {
               </Col>
               <Col xs={4}>
                 <h3 className="fw-bold mb-0">
-                  <Counter end={1200} />
+                  <Counter end={1200} startAnimate={isInView} />
                 </h3>
                 <small
                   className="text-muted text-uppercase fw-bold"
@@ -44,7 +68,7 @@ export const StatsSection = () => {
               </Col>
               <Col xs={4}>
                 <h3 className="fw-bold mb-0">
-                  <Counter end={500} suffix="+" />
+                  <Counter end={500} suffix="+" startAnimate={isInView} />
                 </h3>
                 <small
                   className="text-muted text-uppercase fw-bold"
