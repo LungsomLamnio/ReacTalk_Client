@@ -20,7 +20,6 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Updated to Port 5001 to bypass macOS AirPlay conflict
       const response = await axios.post(
         "http://localhost:3001/api/auth/login",
         loginDetails,
@@ -29,8 +28,10 @@ export default function Login() {
       if (response.status === 200) {
         const { token, user } = response.data;
 
-        localStorage.setItem("token", token);
-        localStorage.setItem("username", user.username);
+        // CRITICAL UPDATES: Save all necessary session data
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("userId", user._id); // This fixes the "Me" alignment bug
+        sessionStorage.setItem("username", user.username);
 
         alert("Login Successful");
         navigate("/");
@@ -43,31 +44,23 @@ export default function Login() {
   return (
     <div
       className="auth-page-wrapper min-vh-100 d-flex align-items-center py-5"
-      style={{ backgroundColor: "#fafaf9" }} /* Consistent soft background */
+      style={{ backgroundColor: "#fafaf9" }}
     >
       <Container>
         <Row className="justify-content-center w-100 m-0">
           <Col xs={12} sm={10} md={7} lg={5} xl={4}>
-            {/* rounded-5 matches your landing page QR cards */}
             <Card className="shadow-sm border-0 rounded-5 overflow-hidden">
               <Card.Body className="p-4 p-md-5 bg-white">
                 <div className="text-center mb-4">
-                  <h2
-                    className="fw-bold mb-1"
-                    style={{ letterSpacing: "-1px" }}
-                  >
+                  <h2 className="fw-bold mb-1" style={{ letterSpacing: "-1px" }}>
                     Welcome Back
                   </h2>
-                  <p className="text-muted small">
-                    Sign in to continue to ReacTalk
-                  </p>
+                  <p className="text-muted small">Sign in to continue to ReacTalk</p>
                 </div>
 
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3" controlId="loginUsername">
-                    <Form.Label className="small fw-bold text-dark">
-                      Username
-                    </Form.Label>
+                    <Form.Label className="small fw-bold text-dark">Username</Form.Label>
                     <Form.Control
                       name="username"
                       value={loginDetails.username}
@@ -81,9 +74,7 @@ export default function Login() {
                   </Form.Group>
 
                   <Form.Group className="mb-4" controlId="loginPassword">
-                    <Form.Label className="small fw-bold text-dark">
-                      Password
-                    </Form.Label>
+                    <Form.Label className="small fw-bold text-dark">Password</Form.Label>
                     <Form.Control
                       name="password"
                       value={loginDetails.password}
@@ -96,7 +87,6 @@ export default function Login() {
                     />
                   </Form.Group>
 
-                  {/* Dark pill button matches the Landing Page style */}
                   <Button
                     variant="dark"
                     type="submit"
@@ -109,10 +99,7 @@ export default function Login() {
                 <div className="text-center mt-3">
                   <p className="small text-muted mb-0">
                     Don't have an account?{" "}
-                    <Link
-                      to="/signup"
-                      className="text-decoration-none fw-bold text-dark"
-                    >
+                    <Link to="/signup" className="text-decoration-none fw-bold text-dark">
                       Sign Up
                     </Link>
                   </p>

@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col } from "react-bootstrap";
+import { useLocation } from "react-router-dom"; 
+import { io } from "socket.io-client";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 
 export default function ChatContainer() {
+  const location = useLocation(); 
   const [contacts] = useState([
     {
       id: 0,
@@ -25,12 +28,51 @@ export default function ChatContainer() {
     },
   ]);
 
-  const [activeChat, setActiveChat] = useState(null); // Default to null for mobile view
+  const [activeChat, setActiveChat] = useState(null);
   const [isMobileChatOpen, setIsMobileChatOpen] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+  const socket = useRef();
+
+  // 1. Socket Connection & Identity Handshake
+  useEffect(() => {
+    socket.current = io("http://localhost:3001");
+    const userId = sessionStorage.getItem("userId");
+
+    // CRITICAL: Ensure we tell the server who we are as soon as we connect
+    if (userId) {
+      socket.current.emit("addUser", String(userId)); // Force string for backend Map
+    }
+
+    socket.current.on("getOnlineUsers", (users) => {
+      setOnlineUsers(users);
+    });
+
+    return () => {
+      if (socket.current) socket.current.disconnect();
+    };
+  }, []);
+
+  // 2. Persistent Identity Check (Useful for multiple tabs/browsers)
+  useEffect(() => {
+    const userId = sessionStorage.getItem("userId");
+    if (socket.current && userId) {
+      socket.current.emit("addUser", String(userId));
+    }
+  }, [activeChat]); // Re-verify identity when switching chats to ensure socket is alive
+
+  // 3. Listen for navigation from ExternalUserProfile
+  useEffect(() => {
+    if (location.state?.selectedUser) {
+      setActiveChat(location.state.selectedUser);
+      setIsMobileChatOpen(true);
+
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   const handleSelectChat = (chat) => {
     setActiveChat(chat);
-    setIsMobileChatOpen(true); // Switch to ChatWindow on mobile
+    setIsMobileChatOpen(true);
   };
 
   return (
@@ -40,7 +82,6 @@ export default function ChatContainer() {
       style={{ backgroundColor: "#fafaf9" }}
     >
       <Row className="h-100 g-0">
-        {/* Sidebar: Hidden on mobile if a chat is open */}
         <Col
           xs={12}
           md={4}
@@ -51,10 +92,10 @@ export default function ChatContainer() {
             contacts={contacts}
             activeChat={activeChat}
             setActiveChat={handleSelectChat}
+            onlineUsers={onlineUsers}
           />
         </Col>
 
-        {/* Chat Window: Hidden on mobile if no chat is open */}
         <Col
           xs={12}
           md={8}
@@ -63,7 +104,8 @@ export default function ChatContainer() {
         >
           <ChatWindow
             activeChat={activeChat}
-            onBack={() => setIsMobileChatOpen(false)} // Pass back function
+            socket={socket} // Passing the socket reference to handle real-time UI updates
+            onBack={() => setIsMobileChatOpen(false)}
           />
         </Col>
       </Row>
