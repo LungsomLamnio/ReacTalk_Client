@@ -9,7 +9,7 @@ export const Navigation = () => {
   const [user, setUser] = useState(null);
   const [profilePic, setProfilePic] = useState("");
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://reactalk-server.onrender.com";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -18,7 +18,6 @@ export const Navigation = () => {
 
       if (token) {
         try {
-          // Fetch the full user object to get the profile picture path
           const response = await axios.get(`${BASE_URL}/api/user/me`, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -29,11 +28,9 @@ export const Navigation = () => {
           }
         } catch (err) {
           console.error("Error fetching navbar user data", err);
-          // If token is invalid, clear user state
           setUser(null);
         }
       } else if (storedUser) {
-        // Fallback to localStorage if no network/token yet
         setUser(storedUser);
       }
     };
@@ -70,7 +67,6 @@ export const Navigation = () => {
           </Nav>
 
           <div className="d-flex gap-3 align-items-center">
-            {/* Conditional Rendering for Profile Icon */}
             <div
               className="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden border"
               style={{ width: "35px", height: "35px", cursor: "pointer" }}

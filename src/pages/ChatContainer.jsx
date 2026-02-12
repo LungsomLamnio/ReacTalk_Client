@@ -6,10 +6,7 @@ import axios from "axios";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 
-/**
- * ChatContainer: The central hub for ReacTalk.
- * Manages dynamic recent chats, socket connections, and online status.
- */
+
 export default function ChatContainer() {
   const location = useLocation(); 
   const navigate = useNavigate(); 
@@ -20,15 +17,13 @@ export default function ChatContainer() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const socket = useRef();
 
-  // 1. Initial Fetch of Recent Conversations (WhatsApp Style)
   useEffect(() => {
     const fetchRecentChats = async () => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) return;
 
-        // Fetches from the corrected 'getRecentChats' backend controller
-        const res = await axios.get("http://localhost:3001/api/messages/recent", {
+        const res = await axios.get("https://reactalk-server.onrender.com/api/messages/recent", {
           headers: { Authorization: `Bearer ${token}` }
         });
         setRecentChats(res.data);
@@ -41,7 +36,6 @@ export default function ChatContainer() {
     fetchRecentChats();
   }, []);
 
-  // 2. Socket Lifecycle & Real-time Sidebar Re-ordering
   useEffect(() => {
     const userId = sessionStorage.getItem("userId");
     if (!userId || userId === "undefined") {
@@ -49,26 +43,20 @@ export default function ChatContainer() {
       return;
     }
 
-    // Connect to Socket server
-    socket.current = io("http://localhost:3001");
+    socket.current = io("https://reactalk-server.onrender.com");
     socket.current.emit("addUser", String(userId));
 
-    // Monitor global online users list
     socket.current.on("getOnlineUsers", (users) => setOnlineUsers(users));
 
-    // WHATSAPP BEHAVIOR: Move incoming message chat to the top
     socket.current.on("getMessage", (data) => {
       setRecentChats((prev) => {
-        // Find existing chat in sidebar list
         const existingChat = prev.find((c) => String(c.id) === String(data.senderId));
-        // Remove it from current position
         const filtered = prev.filter((c) => String(c.id) !== String(data.senderId));
 
         const updatedChat = existingChat 
           ? { ...existingChat, lastMsg: data.text }
           : { id: data.senderId, name: "New User", lastMsg: data.text };
 
-        // Return new array with the updated chat at index 0
         return [updatedChat, ...filtered];
       });
     });
@@ -78,15 +66,12 @@ export default function ChatContainer() {
     };
   }, [navigate]);
 
-  // 3. Sync sidebar when YOU send a message
   const handleMessageSent = (text) => {
     if (!activeChat) return;
 
     setRecentChats((prev) => {
-      // 1. Remove the user from their current position
       const filtered = prev.filter((c) => String(c.id) !== String(activeChat.id));
       
-      // 2. Prepend them to the top with the new message
       const updatedChat = { 
         ...activeChat, 
         lastMsg: text, 
@@ -126,13 +111,12 @@ export default function ChatContainer() {
               activeChat 
                 ? { 
                     ...activeChat, 
-                    // Dynamically map online status from socket array
                     status: onlineUsers.includes(String(activeChat.id)) ? "Online" : "Offline" 
                   } 
                 : null
             }
             socket={socket}
-            onMessageSent={handleMessageSent} // Callback to refresh sidebar order
+            onMessageSent={handleMessageSent}
           />
         </Col>
       </Row>

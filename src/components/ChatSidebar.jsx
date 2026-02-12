@@ -9,7 +9,6 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
 
-  // 1. Search Logic: Finds new users to start chats with
   useEffect(() => {
     const searchUsers = async () => {
       if (!searchTerm.trim()) {
@@ -18,7 +17,7 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
       }
       try {
         const token = sessionStorage.getItem("token");
-        const res = await axios.get(`http://localhost:3001/api/user/search?query=${searchTerm}`, {
+        const res = await axios.get(`https://reactalk-server.onrender.com/api/user/search?query=${searchTerm}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSearchResults(res.data);
@@ -30,65 +29,69 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
     return () => clearTimeout(delayDebounceFn);
   }, [searchTerm]);
 
-  // 2. WhatsApp Logout Fix: Disconnects socket to clear "Online" status
   const handleLogout = () => {
-    if (socket && socket.current) {
-      socket.current.disconnect(); 
-    }
+    if (socket && socket.current) socket.current.disconnect(); 
     sessionStorage.clear();
     navigate("/login");
   };
 
   return (
-    <div className="h-100 d-flex bg-white border-end">
-      {/* Navigation Rail Layer */}
-      <div className="d-flex flex-column align-items-center py-3 border-end bg-light-subtle" style={{ width: "65px" }}>
+    <div className="h-100 d-flex bg-white">
+      <div className="d-flex flex-column align-items-center border-end bg-light" style={{ width: "70px", paddingTop: "12px", paddingBottom: "12px" }}>
         <Nav className="flex-column gap-4 align-items-center flex-grow-1">
-          <ChatDots size={22} className="text-primary cursor-pointer" />
-          <Telephone size={22} className="text-muted cursor-pointer" />
-          <Gear size={22} className="text-muted cursor-pointer" />
+          <ChatDots size={24} className="text-primary cursor-pointer" />
+          <Telephone size={24} className="text-muted cursor-pointer hover-text-dark" />
+          <Gear size={24} className="text-muted cursor-pointer hover-text-dark" />
         </Nav>
+
         <Dropdown drop="up" align="end">
-          <Dropdown.Toggle as="div" className="no-caret cursor-pointer p-0 border-0">
-            <PersonCircle size={28} />
+          <Dropdown.Toggle 
+            as="div" 
+            className="cursor-pointer p-0 border-0 shadow-none"
+          >
+            <PersonCircle size={32} className="text-dark opacity-75" />
           </Dropdown.Toggle>
-          <Dropdown.Menu className="rounded-4 shadow border-0 mb-3">
-            <Dropdown.Item onClick={() => navigate("/profile")}>My Account</Dropdown.Item>
+          <Dropdown.Menu className="rounded-4 shadow-lg border-0 mb-3">
+            <Dropdown.Item onClick={() => navigate("/profile")} className="py-2">My Account</Dropdown.Item>
             <Dropdown.Divider />
-            <Dropdown.Item onClick={handleLogout} className="text-danger d-flex align-items-center gap-2">
+            <Dropdown.Item onClick={handleLogout} className="text-danger py-2 d-flex align-items-center gap-2">
               <BoxArrowRight /> Logout
             </Dropdown.Item>
           </Dropdown.Menu>
         </Dropdown>
       </div>
 
-      {/* Chat List Layer */}
       <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: "0" }}>
-        <div className="px-3 border-bottom d-flex justify-content-between align-items-center" style={{ height: "72px" }}>
-          <h4 className="fw-bold mb-0 text-dark">Chats</h4>
-          <ThreeDotsVertical className="text-muted cursor-pointer" />
+        <div className="px-3 border-bottom d-flex justify-content-between align-items-center bg-white" style={{ height: "72px" }}>
+          <h5 className="fw-bold mb-0 text-dark" style={{ letterSpacing: "-0.5px" }}>Chats</h5>
+          <div className="d-flex align-items-center pe-1">
+             <ThreeDotsVertical 
+                size={24}
+                className="text-dark cursor-pointer p-1 rounded-circle hover-bg-light" 
+                style={{ opacity: 1 }}
+             />
+          </div>
         </div>
         
-        <div className="p-3 bg-light">
-          <InputGroup className="bg-white rounded-pill border">
-            <InputGroup.Text className="bg-white border-0 ps-3">
-              <Search className="text-muted" />
+        <div className="p-3">
+          <InputGroup className="bg-light rounded-pill border-0 px-2 overflow-hidden shadow-none">
+            <InputGroup.Text className="bg-transparent border-0 ps-3">
+              <Search className="text-muted" size={14} />
             </InputGroup.Text>
             <Form.Control 
-              placeholder="Search users..." 
-              className="border-0 shadow-none" 
+              placeholder="Search conversations..." 
+              className="bg-transparent border-0 shadow-none py-2 small" 
               value={searchTerm} 
               onChange={(e) => setSearchTerm(e.target.value)} 
             />
           </InputGroup>
         </div>
 
-        <ListGroup variant="flush" className="flex-grow-1 overflow-auto">
-          {/* Logic: Display Search Results or Recent Chat History */}
+        <ListGroup variant="flush" className="flex-grow-1 overflow-auto custom-scrollbar">
           {(searchTerm ? searchResults : contacts).map((user) => {
             const userId = user._id || user.id;
-            // Check if this contact is currently online
             const isOnline = onlineUsers.includes(String(userId));
+            const isActive = activeChat?.id === userId;
 
             return (
               <ListGroup.Item
@@ -102,46 +105,39 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
                   });
                   setSearchTerm("");
                 }}
-                className={`p-3 border-0 border-bottom cursor-pointer ${activeChat?.id === userId ? "bg-light" : ""}`}
+                className={`p-3 border-0 transition-all cursor-pointer mx-2 my-1 rounded-4 ${isActive ? "bg-primary-subtle" : "hover-bg-light"}`}
               >
                 <div className="d-flex align-items-center">
                   <div className="position-relative me-3">
                     {user.profilePic ? (
                       <img 
-                        src={`http://localhost:3001${user.profilePic}`} 
-                        className="rounded-circle" 
-                        style={{ width: "45px", height: "45px", objectFit: "cover" }} 
-                        alt="" 
-                      />
+                      src={user.profilePic?.startsWith("http") ? user.profilePic : `https://reactalk-server.onrender.com${user.profilePic}`} 
+                      className="rounded-circle shadow-sm" 
+                      style={{ width: "50px", height: "50px", objectFit: "cover", border: "2px solid white" }} 
+                      alt="" 
+                    />
                     ) : (
-                      <PersonCircle size={45} className="text-secondary" />
+                      <div className="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: "50px", height: "50px" }}>
+                        <PersonCircle size={32} className="text-secondary opacity-50" />
+                      </div>
                     )}
-                    {/* WhatsApp style online indicator dot in sidebar */}
                     {isOnline && (
-                      <span 
-                        className="position-absolute bottom-0 end-0 border border-white border-2 rounded-circle bg-success"
-                        style={{ width: "12px", height: "12px" }}
-                      ></span>
+                      <span className="position-absolute bottom-0 end-0 border border-white border-2 rounded-circle bg-success shadow-sm" style={{ width: "14px", height: "14px" }}></span>
                     )}
                   </div>
                   <div className="overflow-hidden flex-grow-1">
                     <div className="d-flex justify-content-between align-items-center">
-                      <h6 className="mb-0 fw-bold text-dark text-truncate">
-                        {user.username || user.name}
-                      </h6>
+                      <h6 className={`mb-0 fw-bold text-truncate ${isActive ? "text-primary" : "text-dark"}`}>{user.username || user.name}</h6>
+                      <small className="text-muted extra-small">12:45 PM</small>
                     </div>
-                    <small className="text-muted text-truncate d-block">
-                      {searchTerm ? (user.bio || "Click to message") : user.lastMsg}
+                    <small className="text-muted text-truncate d-block mt-1" style={{ fontSize: "0.85rem" }}>
+                      {searchTerm ? (user.bio || "Available") : user.lastMsg}
                     </small>
                   </div>
                 </div>
               </ListGroup.Item>
             );
           })}
-          
-          {searchTerm && searchResults.length === 0 && (
-            <div className="text-center p-4 text-muted small">No users found.</div>
-          )}
         </ListGroup>
       </div>
     </div>

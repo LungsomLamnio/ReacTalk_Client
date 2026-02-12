@@ -1,4 +1,3 @@
-// components/DeviceMockup.jsx
 import { Button } from "react-bootstrap";
 
 export const DeviceMockup = () => (
@@ -34,7 +33,6 @@ export const DeviceMockup = () => (
         }}
       />
       <div className="bg-white h-100 w-100 p-3 pt-5 overflow-hidden">
-        {/* Phone Content */}
         <div className="d-flex justify-content-between align-items-center mb-4 px-1">
           <div
             className="bg-success-subtle text-success rounded-pill px-3 py-1 small fw-bold"

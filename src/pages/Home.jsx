@@ -13,7 +13,6 @@ export default function Home() {
       className="landing-page position-relative overflow-hidden"
       style={{ backgroundColor: "#fafaf9", minHeight: "100vh" }}
     >
-      {/* --- Visual Background Elements --- */}
       <div
         className="position-absolute rounded-circle"
         style={{
@@ -39,16 +38,12 @@ export default function Home() {
         }}
       />
 
-      {/* 1. Modular Navbar */}
       <Navigation />
 
-      {/* 2. Modular Hero Section */}
       <Hero navigate={navigate} />
 
-      {/* 3. Modular Statistics & Download Section */}
       <StatsSection />
 
-      {/* 4. Modular Footer */}
       <Footer />
     </div>
   );

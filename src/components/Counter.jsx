@@ -1,4 +1,3 @@
-// components/Counter.jsx
 import React, { useState, useEffect } from "react";
 
 export const Counter = ({
@@ -10,7 +9,6 @@ export const Counter = ({
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    // Only run the logic if startAnimate is true
     if (!startAnimate) return;
 
     let start = 0;
@@ -26,7 +24,7 @@ export const Counter = ({
     }, 16);
 
     return () => clearInterval(timer);
-  }, [end, duration, startAnimate]); // Add startAnimate to dependency array
+  }, [end, duration, startAnimate]);
 
   return (
     <span>

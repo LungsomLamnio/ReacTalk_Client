@@ -19,7 +19,7 @@ export default function ExternalUserProfile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://reactalk-server.onrender.com";
   const myId = sessionStorage.getItem("userId");
 
   useEffect(() => {
@@ -31,7 +31,6 @@ export default function ExternalUserProfile() {
         });
   
         setUser(res.data);
-        // Trust the backend's calculation
         setIsFollowing(res.data.isFollowing); 
       } catch (err) {
         navigate("/chat");
@@ -68,9 +67,8 @@ export default function ExternalUserProfile() {
       );
   
       if (res.data) {
-        setUser(res.data); // Update profile stats with server-verified data
+        setUser(res.data);
         
-        // Re-calculate button status from server-verified list
         const isNowFollowing = res.data.followers.some(
           (followerId) => String(followerId).trim() === String(myId).trim()
         );

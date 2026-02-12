@@ -1,4 +1,3 @@
-// components/Footer.jsx
 import React from "react";
 import { Container, Row, Col, Nav, Button } from "react-bootstrap";
 

@@ -1,4 +1,3 @@
-// components/Hero.jsx
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { DeviceMockup } from "./DeviceMockup";
 
@@ -42,7 +41,6 @@ export const Hero = ({ navigate }) => (
           </div>
         </Col>
 
-        {/* 3. CSS-Only Device Mockup */}
         <Col lg={6} className="text-center d-flex justify-content-center">
           <DeviceMockup />
         </Col>

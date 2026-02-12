@@ -21,7 +21,6 @@ const ProfileAvatar = ({ preview, username, onFileChange, readOnly }) => {
         )}
       </div>
 
-      {/* Only show camera icon if NOT read-only */}
       {!readOnly && (
         <>
           <label

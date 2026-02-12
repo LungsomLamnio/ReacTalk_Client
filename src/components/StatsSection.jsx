@@ -1,4 +1,3 @@
-// components/StatsSection.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Apple, Android2 } from "react-bootstrap-icons";
@@ -11,13 +10,12 @@ export const StatsSection = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // If the section is visible, set isInView to true
         if (entry.isIntersecting) {
           setIsInView(true);
-          observer.disconnect(); // Stop observing once animation starts
+          observer.disconnect();
         }
       },
-      { threshold: 0.2 }, // Trigger when 20% of the section is visible
+      { threshold: 0.2 },
     );
 
     if (sectionRef.current) {
@@ -29,7 +27,7 @@ export const StatsSection = () => {
 
   return (
     <section
-      ref={sectionRef} // Attach the observer here
+      ref={sectionRef}
       className="py-5 mt-5 bg-white border-top border-bottom position-relative"
     >
       <Container>
@@ -80,10 +78,8 @@ export const StatsSection = () => {
             </Row>
           </Col>
 
-          {/* Right: Modern Download Cards with QRs */}
           <Col lg={6}>
             <div className="d-flex flex-wrap gap-4 justify-content-center justify-content-lg-end">
-              {/* iOS Card */}
               <div
                 className="p-4 rounded-5 shadow-sm border-0 position-relative overflow-hidden"
                 style={{
@@ -120,7 +116,6 @@ export const StatsSection = () => {
                 </div>
               </div>
 
-              {/* Android Card */}
               <div
                 className="p-4 rounded-5 shadow-sm border-0 position-relative overflow-hidden"
                 style={{

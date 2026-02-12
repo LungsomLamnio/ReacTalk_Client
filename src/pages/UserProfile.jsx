@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Card, Button, Spinner } from "react-bootstrap";
-import { ArrowLeft, PencilSquare } from "react-bootstrap-icons"; // Added Pencil icon
+import { ArrowLeft, PencilSquare } from "react-bootstrap-icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ProfileAvatar from "../components/ProfileAvatar";
@@ -11,7 +11,7 @@ export default function UserProfile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); // New state for toggle
+  const [isEditing, setIsEditing] = useState(false); 
 
   const [userData, setUserData] = useState({
     username: "",
@@ -22,7 +22,7 @@ export default function UserProfile() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://reactalk-server.onrender.com";
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -36,7 +36,12 @@ export default function UserProfile() {
         const data = response.data;
         setUserData(data);
         setOriginalData({ username: data.username, bio: data.bio });
-        setPreview(data.profilePic ? `${BASE_URL}${data.profilePic}` : "");
+      
+        const imagePath = data.profilePic?.startsWith("http") 
+          ? data.profilePic 
+          : data.profilePic ? `${BASE_URL}${data.profilePic}` : "";
+          
+        setPreview(imagePath);
       } catch (err) {
         navigate("/login");
       } finally {
@@ -56,7 +61,7 @@ export default function UserProfile() {
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
-      setIsEditing(true); // Auto-enable edit mode if a photo is picked
+      setIsEditing(true);
     }
   };
 
@@ -78,7 +83,7 @@ export default function UserProfile() {
       });
       setOriginalData({ username: res.data.username, bio: res.data.bio });
       setSelectedFile(null);
-      setIsEditing(false); // Exit edit mode after saving
+      setIsEditing(false);
       alert("Profile Updated!");
     } catch (err) {
       alert("Error updating profile");
@@ -110,7 +115,7 @@ export default function UserProfile() {
               <ArrowLeft size={20} />
             </Button>
             <h4 className="fw-bold mb-0">My Account</h4>
-            <div style={{ width: "40px" }}></div> {/* Spacer for symmetry */}
+            <div style={{ width: "40px" }}></div>
           </Card.Header>
 
           <Card.Body className="p-4 text-center">
@@ -125,7 +130,6 @@ export default function UserProfile() {
               following={userData.following?.length}
             />
 
-            {/* Conditional Rendering: Form vs View Mode */}
             {isEditing ? (
               <ProfileForm
                 userData={userData}
@@ -134,7 +138,7 @@ export default function UserProfile() {
                 saving={saving}
                 canSave={isChanged}
                 onCancel={() => {
-                  setUserData({ ...userData, ...originalData }); // Revert changes
+                  setUserData({ ...userData, ...originalData });
                   setIsEditing(false);
                 }}
               />

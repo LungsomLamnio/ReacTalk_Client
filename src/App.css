@@ -9,3 +9,15 @@
     padding: 10px;
   }
 }
+
+.dropdown-toggle::after {
+  display: none !important;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
