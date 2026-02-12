@@ -45,10 +45,7 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
         </Nav>
 
         <Dropdown drop="up" align="end">
-          <Dropdown.Toggle 
-            as="div" 
-            className="cursor-pointer p-0 border-0 shadow-none"
-          >
+          <Dropdown.Toggle as="div" className="cursor-pointer p-0 border-0 shadow-none">
             <PersonCircle size={32} className="text-dark opacity-75" />
           </Dropdown.Toggle>
           <Dropdown.Menu className="rounded-4 shadow-lg border-0 mb-3">
@@ -65,11 +62,7 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
         <div className="px-3 border-bottom d-flex justify-content-between align-items-center bg-white" style={{ height: "72px" }}>
           <h5 className="fw-bold mb-0 text-dark" style={{ letterSpacing: "-0.5px" }}>Chats</h5>
           <div className="d-flex align-items-center pe-1">
-             <ThreeDotsVertical 
-                size={24}
-                className="text-dark cursor-pointer p-1 rounded-circle hover-bg-light" 
-                style={{ opacity: 1 }}
-             />
+             <ThreeDotsVertical size={24} className="text-dark cursor-pointer p-1 rounded-circle hover-bg-light" style={{ opacity: 1 }} />
           </div>
         </div>
         
@@ -90,8 +83,9 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
         <ListGroup variant="flush" className="flex-grow-1 overflow-auto custom-scrollbar">
           {(searchTerm ? searchResults : contacts).map((user) => {
             const userId = user._id || user.id;
-            const isOnline = onlineUsers.includes(String(userId));
-            const isActive = activeChat?.id === userId;
+            
+            const isOnline = onlineUsers.some(onlineId => String(onlineId) === String(userId));
+            const isActive = String(activeChat?.id || activeChat?._id) === String(userId);
 
             return (
               <ListGroup.Item
@@ -111,11 +105,11 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
                   <div className="position-relative me-3">
                     {user.profilePic ? (
                       <img 
-                      src={user.profilePic?.startsWith("http") ? user.profilePic : `https://reactalk-server.onrender.com${user.profilePic}`} 
-                      className="rounded-circle shadow-sm" 
-                      style={{ width: "50px", height: "50px", objectFit: "cover", border: "2px solid white" }} 
-                      alt="" 
-                    />
+                        src={user.profilePic?.startsWith("http") ? user.profilePic : `https://reactalk-server.onrender.com${user.profilePic}`} 
+                        className="rounded-circle shadow-sm" 
+                        style={{ width: "50px", height: "50px", objectFit: "cover", border: "2px solid white" }} 
+                        alt="" 
+                      />
                     ) : (
                       <div className="bg-secondary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center" style={{ width: "50px", height: "50px" }}>
                         <PersonCircle size={32} className="text-secondary opacity-50" />
@@ -128,7 +122,9 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
                   <div className="overflow-hidden flex-grow-1">
                     <div className="d-flex justify-content-between align-items-center">
                       <h6 className={`mb-0 fw-bold text-truncate ${isActive ? "text-primary" : "text-dark"}`}>{user.username || user.name}</h6>
-                      <small className="text-muted extra-small">12:45 PM</small>
+                      <small className="text-muted extra-small">
+                        {user.time || "12:45 PM"}
+                      </small>
                     </div>
                     <small className="text-muted text-truncate d-block mt-1" style={{ fontSize: "0.85rem" }}>
                       {searchTerm ? (user.bio || "Available") : user.lastMsg}

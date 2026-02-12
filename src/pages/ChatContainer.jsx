@@ -44,7 +44,7 @@ export default function ChatContainer() {
     }
 
     socket.current = io("https://reactalk-server.onrender.com", {
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
       withCredentials: true
     });
     socket.current.emit("addUser", String(userId));
@@ -72,22 +72,23 @@ export default function ChatContainer() {
   useEffect(() => {
     if (!socket.current) return;
   
-    const handleIncomingMessage = (data) => {
+    const handleGlobalMessage = (data) => {
       setRecentChats((prev) => {
-        const filtered = prev.filter((c) => String(c.id) !== String(data.senderId));
+        const otherChats = prev.filter((c) => String(c.id) !== String(data.senderId));
         const existingChat = prev.find((c) => String(c.id) === String(data.senderId));
         
         const updatedChat = existingChat 
-          ? { ...existingChat, lastMsg: data.text, time: data.time }
-          : { id: data.senderId, name: "New Message", lastMsg: data.text, time: data.time };
+          ? { ...existingChat, lastMsg: data.text }
+          : { id: data.senderId, name: "New Message", lastMsg: data.text };
   
-        return [updatedChat, ...filtered];
+        return [updatedChat, ...otherChats];
       });
     };
   
-    socket.current.on("getMessage", handleIncomingMessage);
-    return () => socket.current?.off("getMessage", handleIncomingMessage);
-  }, [recentChats]);
+    socket.current.on("getMessage", handleGlobalMessage);
+    
+    return () => socket.current.off("getMessage", handleGlobalMessage);
+  }, [socket.current]);
 
   const handleMessageSent = (text) => {
     if (!activeChat) return;
