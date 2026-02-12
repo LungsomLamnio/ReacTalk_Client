@@ -28,13 +28,21 @@ export default function Login() {
       if (response.status === 200) {
         const { token, user } = response.data;
 
-        // CRITICAL UPDATES: Save all necessary session data
-        sessionStorage.setItem("token", token);
-        sessionStorage.setItem("userId", user._id); // This fixes the "Me" alignment bug
-        sessionStorage.setItem("username", user.username);
+        // Verify the ID property name from the backend
+        const actualUserId = user?._id || user?.id;
 
-        alert("Login Successful");
-        navigate("/");
+        if (actualUserId) {
+          sessionStorage.setItem("token", token);
+          sessionStorage.setItem("userId", String(actualUserId)); // Save as string
+          sessionStorage.setItem("username", user.username);
+          
+          console.log("Session saved for user:", actualUserId);
+          alert("Login Successful");
+          navigate("/");
+        } else {
+          console.error("User object received but ID is missing:", user);
+          alert("Login error: User ID not found in server response.");
+        }
       }
     } catch (err) {
       alert(err.response?.data?.message || "An error occurred during login");

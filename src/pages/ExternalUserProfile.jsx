@@ -20,7 +20,7 @@ export default function ExternalUserProfile() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const BASE_URL = "http://localhost:3001";
-  const myId = localStorage.getItem("userId");
+  const myId = sessionStorage.getItem("userId");
 
   useEffect(() => {
     const fetchUser = async () => {

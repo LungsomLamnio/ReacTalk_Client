@@ -26,7 +26,7 @@ export default function UserProfile() {
 
   useEffect(() => {
     const fetchUserProfile = async () => {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       if (!token) return navigate("/login");
 
       try {
@@ -63,7 +63,7 @@ export default function UserProfile() {
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
-    const token = localStorage.getItem("token");
+    const token = sessionStorage.getItem("token");
     const formData = new FormData();
     formData.append("username", userData.username);
     formData.append("bio", userData.bio);

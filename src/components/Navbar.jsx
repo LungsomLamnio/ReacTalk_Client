@@ -13,8 +13,8 @@ export const Navigation = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const token = localStorage.getItem("token");
-      const storedUser = localStorage.getItem("username");
+      const token = sessionStorage.getItem("token");
+      const storedUser = sessionStorage.getItem("username");
 
       if (token) {
         try {
