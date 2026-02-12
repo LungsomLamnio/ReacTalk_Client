@@ -24,7 +24,11 @@ export const Navigation = () => {
 
           setUser(response.data.username);
           if (response.data.profilePic) {
-            setProfilePic(`${BASE_URL}${response.data.profilePic}`);
+            const imagePath = response.data.profilePic.startsWith("http")
+              ? response.data.profilePic
+              : `${BASE_URL}${response.data.profilePic}`;
+            
+            setProfilePic(imagePath);
           }
         } catch (err) {
           console.error("Error fetching navbar user data", err);
