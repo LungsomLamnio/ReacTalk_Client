@@ -43,7 +43,10 @@ export default function ChatContainer() {
       return;
     }
 
-    socket.current = io("https://reactalk-server.onrender.com");
+    socket.current = io("https://reactalk-server.onrender.com", {
+      transports: ["websocket", "polling"],
+      withCredentials: true
+    });
     socket.current.emit("addUser", String(userId));
 
     socket.current.on("getOnlineUsers", (users) => setOnlineUsers(users));
