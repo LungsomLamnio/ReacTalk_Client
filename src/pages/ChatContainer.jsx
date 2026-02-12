@@ -69,6 +69,26 @@ export default function ChatContainer() {
     };
   }, [navigate]);
 
+  useEffect(() => {
+    if (!socket.current) return;
+  
+    const handleIncomingMessage = (data) => {
+      setRecentChats((prev) => {
+        const filtered = prev.filter((c) => String(c.id) !== String(data.senderId));
+        const existingChat = prev.find((c) => String(c.id) === String(data.senderId));
+        
+        const updatedChat = existingChat 
+          ? { ...existingChat, lastMsg: data.text, time: data.time }
+          : { id: data.senderId, name: "New Message", lastMsg: data.text, time: data.time };
+  
+        return [updatedChat, ...filtered];
+      });
+    };
+  
+    socket.current.on("getMessage", handleIncomingMessage);
+    return () => socket.current?.off("getMessage", handleIncomingMessage);
+  }, [recentChats]);
+
   const handleMessageSent = (text) => {
     if (!activeChat) return;
 
@@ -109,20 +129,20 @@ export default function ChatContainer() {
         </Col>
         
         <Col xs={12} md={8} lg={9} className="h-100">
-  <ChatWindow
-    activeChat={
-      activeChat 
-        ? { 
-            ...activeChat, 
-            status: onlineUsers.includes(String(activeChat.id || activeChat._id)) 
-              ? "Online" 
-              : "Offline" 
-          } 
-        : null
-    }
-    socket={socket}
-    onMessageSent={handleMessageSent}
-  />
+        <ChatWindow
+          activeChat={
+            activeChat 
+              ? { 
+                  ...activeChat, 
+                  status: onlineUsers.some(id => String(id) === String(activeChat.id || activeChat._id)) 
+                    ? "Online" 
+                    : "Offline" 
+                } 
+              : null
+          }
+          socket={socket}
+          onMessageSent={handleMessageSent}
+        />
 </Col>
       </Row>
     </Container>
