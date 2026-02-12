@@ -109,19 +109,21 @@ export default function ChatContainer() {
         </Col>
         
         <Col xs={12} md={8} lg={9} className="h-100">
-          <ChatWindow
-            activeChat={
-              activeChat 
-                ? { 
-                    ...activeChat, 
-                    status: onlineUsers.includes(String(activeChat.id)) ? "Online" : "Offline" 
-                  } 
-                : null
-            }
-            socket={socket}
-            onMessageSent={handleMessageSent}
-          />
-        </Col>
+  <ChatWindow
+    activeChat={
+      activeChat 
+        ? { 
+            ...activeChat, 
+            status: onlineUsers.includes(String(activeChat.id || activeChat._id)) 
+              ? "Online" 
+              : "Offline" 
+          } 
+        : null
+    }
+    socket={socket}
+    onMessageSent={handleMessageSent}
+  />
+</Col>
       </Row>
     </Container>
   );
