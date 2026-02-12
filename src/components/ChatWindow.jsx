@@ -3,7 +3,7 @@ import { Form, Button, InputGroup } from "react-bootstrap";
 import { Send, PersonCircle, ArrowLeft, Search, ThreeDotsVertical } from "react-bootstrap-icons";
 import axios from "axios";
 
-export default function ChatWindow({ activeChat, onBack, socket }) {
+export default function ChatWindow({ activeChat, onBack, socket, onMessageSent }) {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [conversationId, setConversationId] = useState(null);
@@ -42,7 +42,7 @@ export default function ChatWindow({ activeChat, onBack, socket }) {
           sender: m.isMe ? "Me" : activeChat.name,
           text: m.text,
           time: new Date(m.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-          isMe: m.isMe, // Boolean determined by backend comparison
+          isMe: m.isMe, 
         }));
 
         setMessages(history);
@@ -65,10 +65,9 @@ export default function ChatWindow({ activeChat, onBack, socket }) {
             sender: activeChat.name,
             text: data.text,
             time: data.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            isMe: false, // Received messages are always aligned left
+            isMe: false, 
           };
           
-          // Use functional update to maintain state integrity
           setMessages((prev) => [...prev, incomingMsg]);
         }
       };
@@ -89,36 +88,39 @@ export default function ChatWindow({ activeChat, onBack, socket }) {
     if (!message.trim() || !socket.current || !activeChat || !conversationId) return;
 
     const token = sessionStorage.getItem("token");
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     try {
-      const msgRes = await axios.post(
-        `${BASE_URL}/api/messages`,
+      const res = await axios.post(`${BASE_URL}/api/messages`, 
         { conversationId, text: message },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      // Emit event to Socket Server for instant delivery to recipient
+      // Emit via socket for real-time delivery
       socket.current.emit("sendMessage", {
         senderId: myId,
         receiverId: activeChat.id,
         text: message,
       });
 
-      // Update local UI immediately for the sender
+      // Update local message list
       setMessages((prev) => [
-        ...prev,
-        {
-          id: msgRes.data._id,
-          sender: "Me",
-          text: message,
-          time: time,
-          isMe: true,
-        },
+        ...prev, 
+        { 
+          id: res.data._id, 
+          text: message, 
+          time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }), 
+          isMe: true 
+        }
       ]);
+      
+      // WhatsApp behavior: Instantly move this user to the top of the sidebar
+      if (onMessageSent) {
+        onMessageSent(message); 
+      }
+
       setMessage("");
     } catch (err) {
-      console.error("Failed to send:", err);
+      console.error("Failed to send message:", err);
     }
   };
 
