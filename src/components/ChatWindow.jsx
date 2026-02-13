@@ -39,7 +39,6 @@ export default function ChatWindow({ activeChat, onBack, socket, onMessageSent }
         setMessages(msgRes.data.map((m) => ({ 
           id: m._id, 
           text: m.text, 
-          // Use DB timestamp
           time: formatTime(m.createdAt), 
           isMe: String(m.senderId || m.sender) === String(myId),
           status: m.status || "sent" 
@@ -154,7 +153,11 @@ export default function ChatWindow({ activeChat, onBack, socket, onMessageSent }
   return (
     <div className="d-flex flex-column h-100 bg-white shadow-none">
       <div className="px-4 py-2 border-bottom bg-white d-flex align-items-center sticky-top" style={{ height: "72px", zIndex: 10 }}>
-        <Button variant="light" className="d-md-none rounded-circle p-2 me-2 border-0" onClick={onBack}>
+        <Button 
+          variant="light" 
+          className="d-md-none rounded-circle p-2 me-2 border-0 shadow-none" 
+          onClick={() => onBack()}
+        >
           <ArrowLeft size={20} />
         </Button>
         

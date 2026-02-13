@@ -139,10 +139,17 @@ export default function ChatContainer() {
     );
   };
 
+  const handleBack = () => {
+    setActiveChat(null);
+  };
+
   return (
     <Container fluid className="vh-100 p-0 overflow-hidden" style={{ backgroundColor: "#fafaf9" }}>
       <Row className="h-100 g-0">
-        <Col xs={12} md={4} lg={3} className="border-end h-100">
+        <Col 
+          xs={12} md={4} lg={3} 
+          className={`border-end h-100 ${activeChat ? 'd-none d-md-block' : 'd-block'}`}
+        >
           {loadingChats ? (
             <div className="d-flex h-100 align-items-center justify-content-center">
               <Spinner animation="border" variant="primary" />
@@ -158,7 +165,10 @@ export default function ChatContainer() {
           )}
         </Col>
         
-        <Col xs={12} md={8} lg={9} className="h-100">
+        <Col 
+          xs={12} md={8} lg={9} 
+          className={`h-100 ${!activeChat ? 'd-none d-md-block' : 'd-block'}`}
+        >
           <ChatWindow
             activeChat={
               activeChat 
@@ -170,6 +180,7 @@ export default function ChatContainer() {
                   } 
                 : null
             }
+            onBack={handleBack}
             socket={socket}
             onMessageSent={handleMessageSent}
           />
