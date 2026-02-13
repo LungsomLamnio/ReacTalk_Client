@@ -1,0 +1,58 @@
+.chat-window-container {
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+@media (max-width: 767px) {
+  .chat-window-mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2000;
+      transform: translateX(100%);
+      opacity: 0;
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+
+  .chat-window-mobile.active {
+      transform: translateX(0);
+      opacity: 1;
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.message-bubble {
+  animation: slideUp 0.25s ease-out;
+  max-width: 70%;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from {
+      opacity: 0;
+      transform: translateY(12px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
