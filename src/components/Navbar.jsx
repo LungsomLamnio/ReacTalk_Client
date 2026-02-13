@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { PersonCircle, BoxArrowRight } from "react-bootstrap-icons";
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export const Navigation = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [profilePic, setProfilePic] = useState("");
-
-  const BASE_URL = "https://reactalk-server.onrender.com";
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -43,11 +43,11 @@ export const Navigation = () => {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("username");
+    sessionStorage.clear();
+    localStorage.clear();
     setUser(null);
     setProfilePic("");
-    navigate("/");
+    navigate("/login");
   };
 
   return (
@@ -58,7 +58,11 @@ export const Navigation = () => {
       style={{ zIndex: 1000 }}
     >
       <Container>
-        <Navbar.Brand href="#" className="fw-bold fs-3">
+        <Navbar.Brand 
+          onClick={() => navigate("/")} 
+          style={{ cursor: "pointer" }} 
+          className="fw-bold fs-3"
+        >
           ReacTalk
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
@@ -73,7 +77,7 @@ export const Navigation = () => {
           <div className="d-flex gap-3 align-items-center">
             <div
               className="rounded-circle bg-light d-flex align-items-center justify-content-center overflow-hidden border"
-              style={{ width: "35px", height: "35px", cursor: "pointer" }}
+              style={{ width: "40px", height: "40px", cursor: "pointer" }}
               onClick={() => user && navigate("/profile")}
             >
               {profilePic ? (
@@ -83,7 +87,7 @@ export const Navigation = () => {
                   className="w-100 h-100 object-fit-cover"
                 />
               ) : (
-                <PersonCircle size={28} className="text-dark opacity-75" />
+                <PersonCircle size={32} className="text-dark opacity-75" />
               )}
             </div>
 

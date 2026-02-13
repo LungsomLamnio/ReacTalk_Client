@@ -11,6 +11,8 @@ import axios from "axios";
 import ProfileAvatar from "../components/ProfileAvatar";
 import ProfileStats from "../components/ProfileStats";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function ExternalUserProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -19,13 +21,12 @@ export default function ExternalUserProfile() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const BASE_URL = "https://reactalk-server.onrender.com";
   const myId = sessionStorage.getItem("userId");
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = sessionStorage.getItem("token");
         const res = await axios.get(`${BASE_URL}/api/user/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -59,7 +60,7 @@ export default function ExternalUserProfile() {
     setActionLoading(true);
     
     try {
-      const token = localStorage.getItem("token");
+      const token = sessionStorage.getItem("token");
       const res = await axios.post(
         `${BASE_URL}/api/user/follow/${id}`,
         {},
@@ -83,6 +84,10 @@ export default function ExternalUserProfile() {
 
   if (loading) return <div className="text-center mt-5"><Spinner animation="border" /></div>;
 
+  const avatarPreview = user.profilePic 
+    ? (user.profilePic.startsWith("http") ? user.profilePic : `${BASE_URL}${user.profilePic}`) 
+    : "";
+
   return (
     <div className="min-vh-100 py-5" style={{ backgroundColor: "#fafaf9" }}>
       <Container className="d-flex justify-content-center">
@@ -94,7 +99,7 @@ export default function ExternalUserProfile() {
           </Card.Header>
 
           <Card.Body className="p-4 text-center">
-            <ProfileAvatar preview={user.profilePic ? `${BASE_URL}${user.profilePic}` : ""} username={user.username} readOnly={true} />
+            <ProfileAvatar preview={avatarPreview} username={user.username} readOnly={true} />
             <ProfileStats followers={user.followers?.length || 0} following={user.following?.length || 0} />
 
             <h3 className="fw-bold text-dark mb-1">{user.username}</h3>

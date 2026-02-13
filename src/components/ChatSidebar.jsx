@@ -4,6 +4,8 @@ import { PersonCircle, Search, ThreeDotsVertical, ChatDots, Telephone, Gear, Box
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function ChatSidebar({ contacts, activeChat, setActiveChat, socket, onlineUsers }) {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,7 +19,7 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
       }
       try {
         const token = sessionStorage.getItem("token");
-        const res = await axios.get(`https://reactalk-server.onrender.com/api/user/search?query=${searchTerm}`, {
+        const res = await axios.get(`${BASE_URL}/api/user/search?query=${searchTerm}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setSearchResults(res.data);
@@ -83,9 +85,10 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
         <ListGroup variant="flush" className="flex-grow-1 overflow-auto custom-scrollbar">
           {(searchTerm ? searchResults : contacts).map((user) => {
             const userId = user._id || user.id;
-            
             const isOnline = onlineUsers.some(onlineId => String(onlineId) === String(userId));
             const isActive = String(activeChat?.id || activeChat?._id) === String(userId);
+            
+            const unreadCount = user.unreadCount || 0; 
 
             return (
               <ListGroup.Item
@@ -105,7 +108,7 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
                   <div className="position-relative me-3">
                     {user.profilePic ? (
                       <img 
-                        src={user.profilePic?.startsWith("http") ? user.profilePic : `https://reactalk-server.onrender.com${user.profilePic}`} 
+                        src={user.profilePic?.startsWith("http") ? user.profilePic : `${BASE_URL}${user.profilePic}`} 
                         className="rounded-circle shadow-sm" 
                         style={{ width: "50px", height: "50px", objectFit: "cover", border: "2px solid white" }} 
                         alt="" 
@@ -122,13 +125,25 @@ export default function ChatSidebar({ contacts, activeChat, setActiveChat, socke
                   <div className="overflow-hidden flex-grow-1">
                     <div className="d-flex justify-content-between align-items-center">
                       <h6 className={`mb-0 fw-bold text-truncate ${isActive ? "text-primary" : "text-dark"}`}>{user.username || user.name}</h6>
-                      <small className="text-muted extra-small">
-                        {user.time || "12:45 PM"}
+                      
+                      <small className={`${unreadCount > 0 && !isActive ? "text-primary fw-bold" : "text-muted"} extra-small`}>
+                        {user.time}
                       </small>
                     </div>
-                    <small className="text-muted text-truncate d-block mt-1" style={{ fontSize: "0.85rem" }}>
-                      {searchTerm ? (user.bio || "Available") : user.lastMsg}
-                    </small>
+                    <div className="d-flex justify-content-between align-items-center mt-1">
+                      <small className={`${unreadCount > 0 && !isActive ? "text-dark fw-bold" : "text-muted"} text-truncate d-block`} style={{ fontSize: "0.85rem", maxWidth: "85%" }}>
+                        {searchTerm ? (user.bio || "Available") : user.lastMsg}
+                      </small>
+                      
+                      {unreadCount > 0 && !isActive && (
+                        <div 
+                          className="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" 
+                          style={{ minWidth: "20px", height: "20px", fontSize: "0.7rem", padding: "0 5px" }}
+                        >
+                          {unreadCount}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </ListGroup.Item>

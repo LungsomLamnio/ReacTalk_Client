@@ -6,6 +6,7 @@ import axios from "axios";
 import ChatSidebar from "../components/ChatSidebar";
 import ChatWindow from "../components/ChatWindow";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export default function ChatContainer() {
   const location = useLocation(); 
@@ -17,16 +18,32 @@ export default function ChatContainer() {
   const [onlineUsers, setOnlineUsers] = useState([]);
   const socket = useRef();
 
+  const formatSidebarTime = (timestamp) => {
+    if (!timestamp) return "";
+    return new Date(timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const activeChatRef = useRef(activeChat);
+  useEffect(() => {
+    activeChatRef.current = activeChat;
+  }, [activeChat]);
+
   useEffect(() => {
     const fetchRecentChats = async () => {
       try {
         const token = sessionStorage.getItem("token");
         if (!token) return;
 
-        const res = await axios.get("https://reactalk-server.onrender.com/api/messages/recent", {
+        const res = await axios.get(`${BASE_URL}/api/messages/recent`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setRecentChats(res.data);
+        
+        const formattedChats = res.data.map(chat => ({
+          ...chat,
+          time: formatSidebarTime(chat.createdAt || chat.time)
+        }));
+        
+        setRecentChats(formattedChats);
       } catch (err) {
         console.error("Error fetching recent chats:", err);
       } finally {
@@ -43,26 +60,13 @@ export default function ChatContainer() {
       return;
     }
 
-    socket.current = io("https://reactalk-server.onrender.com", {
-      transports: ["websocket"],
+    socket.current = io(BASE_URL, {
+      transports: ["websocket", "polling"],
       withCredentials: true
     });
+    
     socket.current.emit("addUser", String(userId));
-
     socket.current.on("getOnlineUsers", (users) => setOnlineUsers(users));
-
-    socket.current.on("getMessage", (data) => {
-      setRecentChats((prev) => {
-        const existingChat = prev.find((c) => String(c.id) === String(data.senderId));
-        const filtered = prev.filter((c) => String(c.id) !== String(data.senderId));
-
-        const updatedChat = existingChat 
-          ? { ...existingChat, lastMsg: data.text }
-          : { id: data.senderId, name: "New User", lastMsg: data.text };
-
-        return [updatedChat, ...filtered];
-      });
-    });
 
     return () => {
       if (socket.current) socket.current.disconnect();
@@ -74,19 +78,34 @@ export default function ChatContainer() {
   
     const handleGlobalMessage = (data) => {
       setRecentChats((prev) => {
-        const otherChats = prev.filter((c) => String(c.id) !== String(data.senderId));
-        const existingChat = prev.find((c) => String(c.id) === String(data.senderId));
+        const senderId = String(data.senderId);
+        const isNotActive = !activeChatRef.current || String(activeChatRef.current.id || activeChatRef.current._id) !== senderId;
+
+        const otherChats = prev.filter((c) => String(c.id || c._id) !== senderId);
+        const existingChat = prev.find((c) => String(c.id || c._id) === senderId);
         
+        const messageTime = formatSidebarTime(data.createdAt || new Date());
+
         const updatedChat = existingChat 
-          ? { ...existingChat, lastMsg: data.text }
-          : { id: data.senderId, name: "New Message", lastMsg: data.text };
+          ? { 
+              ...existingChat, 
+              lastMsg: data.text,
+              time: messageTime,
+              unreadCount: isNotActive ? (existingChat.unreadCount || 0) + 1 : 0 
+            }
+          : { 
+              id: senderId, 
+              name: data.senderName || "New Message", 
+              lastMsg: data.text, 
+              time: messageTime,
+              unreadCount: isNotActive ? 1 : 0 
+            };
   
         return [updatedChat, ...otherChats];
       });
     };
   
     socket.current.on("getMessage", handleGlobalMessage);
-    
     return () => socket.current.off("getMessage", handleGlobalMessage);
   }, [socket.current]);
 
@@ -94,12 +113,15 @@ export default function ChatContainer() {
     if (!activeChat) return;
 
     setRecentChats((prev) => {
-      const filtered = prev.filter((c) => String(c.id) !== String(activeChat.id));
+      const chatId = String(activeChat.id || activeChat._id);
+      const filtered = prev.filter((c) => String(c.id || c._id) !== chatId);
       
       const updatedChat = { 
         ...activeChat, 
         lastMsg: text, 
-        id: activeChat.id 
+        id: chatId,
+        time: formatSidebarTime(new Date()), 
+        unreadCount: 0
       };
       
       return [updatedChat, ...filtered];
@@ -108,6 +130,13 @@ export default function ChatContainer() {
 
   const handleSelectChat = (chat) => {
     setActiveChat(chat);
+    setRecentChats((prev) => 
+      prev.map((c) => 
+        String(c.id || c._id) === String(chat.id || chat._id) 
+          ? { ...c, unreadCount: 0 } 
+          : c
+      )
+    );
   };
 
   return (
@@ -130,21 +159,21 @@ export default function ChatContainer() {
         </Col>
         
         <Col xs={12} md={8} lg={9} className="h-100">
-        <ChatWindow
-          activeChat={
-            activeChat 
-              ? { 
-                  ...activeChat, 
-                  status: onlineUsers.some(id => String(id) === String(activeChat.id || activeChat._id)) 
-                    ? "Online" 
-                    : "Offline" 
-                } 
-              : null
-          }
-          socket={socket}
-          onMessageSent={handleMessageSent}
-        />
-</Col>
+          <ChatWindow
+            activeChat={
+              activeChat 
+                ? { 
+                    ...activeChat, 
+                    status: onlineUsers.some(id => String(id) === String(activeChat.id || activeChat._id)) 
+                      ? "Online" 
+                      : "Offline" 
+                  } 
+                : null
+            }
+            socket={socket}
+            onMessageSent={handleMessageSent}
+          />
+        </Col>
       </Row>
     </Container>
   );

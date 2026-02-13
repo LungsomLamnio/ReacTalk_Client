@@ -7,6 +7,8 @@ import ProfileAvatar from "../components/ProfileAvatar";
 import ProfileStats from "../components/ProfileStats";
 import ProfileForm from "../components/ProfileForm";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function UserProfile() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -21,8 +23,6 @@ export default function UserProfile() {
   const [originalData, setOriginalData] = useState({ username: "", bio: "" });
   const [selectedFile, setSelectedFile] = useState(null);
   const [preview, setPreview] = useState("");
-
-  const BASE_URL = "https://reactalk-server.onrender.com";
 
   useEffect(() => {
     const fetchUserProfile = async () => {

@@ -4,6 +4,8 @@ import { useState } from "react";
 import axios from "axios";
 import { CheckCircleFill, ExclamationCircleFill } from "react-bootstrap-icons";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export default function SignUp() {
   const [formDetails, setFormDetails] = useState({
     username: "",
@@ -33,7 +35,7 @@ export default function SignUp() {
 
     try {
       const response = await axios.post(
-        "https://reactalk-server.onrender.com/api/auth/signup",
+        `${BASE_URL}/api/auth/signup`,
         {
           username: formDetails.username,
           password: formDetails.password,
@@ -91,7 +93,6 @@ export default function SignUp() {
                   <p className="text-muted small">Connect with friends in real-time</p>
                 </div>
 
-                {/* Inline Error Message */}
                 {status.error && (
                   <Alert variant="danger" className="py-2 small text-center rounded-3 border-0 d-flex align-items-center justify-content-center gap-2">
                     <ExclamationCircleFill /> {status.error}

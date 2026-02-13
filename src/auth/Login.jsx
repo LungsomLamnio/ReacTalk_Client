@@ -4,6 +4,8 @@ import { useState } from "react";
 import axios from "axios";
 import { CheckCircleFill, ExclamationCircleFill } from "react-bootstrap-icons";
 
+const BASE_URL = import.meta.env.VITE_API_URL || "https://reactalk-server.onrender.com";
+
 export default function Login() {
   const [loginDetails, setLoginDetails] = useState({ username: "", password: "" });
   const [status, setStatus] = useState({ loading: false, success: false, error: "" });
@@ -18,7 +20,7 @@ export default function Login() {
     setStatus({ loading: true, success: false, error: "" });
 
     try {
-      const response = await axios.post("https://reactalk-server.onrender.com/api/auth/login", loginDetails);
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, loginDetails);
 
       if (response.status === 200) {
         const { token, user } = response.data;
@@ -53,16 +55,10 @@ export default function Login() {
           zIndex: 1050, display: "flex", alignItems: "center", justifyContent: "center",
           transition: "all 0.5s ease"
         }}>
-          <div className="text-center p-5 rounded-5 shadow-lg bg-white border" style={{ maxWidth: "350px", animation: "zoomIn 0.3s ease-out" }}>
+          <div className="text-center p-5 rounded-5 shadow-lg bg-white border animate-zoom" style={{ maxWidth: "350px" }}>
             <CheckCircleFill size={60} className="text-success mb-3" />
             <h3 className="fw-bold text-dark">Welcome back!</h3>
             <p className="text-muted mb-0">Login successful. Taking you to your chats...</p>
-            <style>{`
-              @keyframes zoomIn {
-                from { opacity: 0; transform: scale(0.9); }
-                to { opacity: 1; transform: scale(1); }
-              }
-            `}</style>
           </div>
         </div>
       )}
@@ -78,7 +74,7 @@ export default function Login() {
                 </div>
 
                 {status.error && (
-                  <div className="alert alert-danger border-0 small d-flex align-items-center gap-2 rounded-3 mb-4">
+                  <div className="alert alert-danger border-0 small d-flex align-items-center justify-content-center gap-2 rounded-3 mb-4">
                     <ExclamationCircleFill /> {status.error}
                   </div>
                 )}
@@ -129,6 +125,16 @@ export default function Login() {
           </Col>
         </Row>
       </Container>
+      
+      <style>{`
+        .animate-zoom {
+          animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @keyframes zoomIn {
+          from { opacity: 0; transform: scale(0.9); }
+          to { opacity: 1; transform: scale(1); }
+        }
+      `}</style>
     </div>
   );
 }
